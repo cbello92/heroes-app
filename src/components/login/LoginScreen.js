@@ -4,8 +4,8 @@ import { types } from '../../types/types';
 
 export const LoginScreen = ({ history }) => {
 
-    const { user, dispatch } = useContext(AuthContext);
-    console.log(user)
+    const { dispatch } = useContext(AuthContext);
+    
     const handleLogin = (e) => {
         let action = {
             type: types.login,

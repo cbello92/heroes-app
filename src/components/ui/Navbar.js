@@ -13,7 +13,7 @@ export const Navbar = () => {
             type: types.logout
         });
 
-        history.push('/login');
+        history.replace('/login');
     }
 
     return (
