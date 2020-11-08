@@ -1,48 +1,30 @@
-import React, { useState, useRef, useEffect } from 'react'
+import React, { useRef, useMemo } from 'react'
 import queryString from 'query-string';
-import { heroes } from '../../data/heroes'
 import { HeroeCard } from '../heroes/HeroeCard';
 import { useForm } from '../../hooks/useForm';
 import { useLocation } from 'react-router-dom';
+import { getHeroesByName } from '../../selectors/getHeroesByName';
 
 export const SearchScreen = ({ history }) => {
 
     const location = useLocation();
-    const { q = '' } =queryString.parse(location.search);
+    const { q = '' } = queryString.parse(location.search);
 
     const inputRef = useRef();
-    const [heroesFiltered, setHeroesFiltered] = useState([]);
-    const [values, handleInputChange, reset] = useForm({
+    // const [heroesFiltered, setHeroesFiltered] = useState([]);
+    const [values, handleInputChange] = useForm({
         search: q
     });
+
+    const { search } = values;
+
+    const heroesFiltered = useMemo(() => getHeroesByName(q), [q]);
 
 
     const handleSearch = (e) => {
         e.preventDefault();
-        
-        const { search } = values;
         history.push(`?q=${search}`);
-
-        if (!search || search.length === 0) {
-            setHeroesFiltered([]);
-            alert("Ingresa el heroe que deseas buscar");
-            inputRef.current.focus();
-            return;
-        }
-
-        let heroesFilter = heroes.filter(x => x.superhero.toLowerCase().includes(search.toLowerCase()));
-
-        setHeroesFiltered(heroesFilter)
-        reset();
-
     }
-
-    // cuando se monta el componente, cuando las dependencias no reciben valor
-    useEffect(() => {
-        let heroesFilter = heroes.filter(x => x.superhero.toLowerCase().includes(q.toLowerCase()));
-
-        setHeroesFiltered(heroesFilter)
-    }, [])
 
     return (
         <div>
@@ -58,7 +40,7 @@ export const SearchScreen = ({ history }) => {
                             ref={inputRef}
                             type="text"
                             name="search"
-                            value={values.search}
+                            value={search}
                             autoComplete="off"
                             placeholder="Find your heroe"
                             className="form-control"
@@ -77,8 +59,26 @@ export const SearchScreen = ({ history }) => {
                 </div>
 
                 <div className="col-7">
-                    <h4>Results ({ heroesFiltered.length } results)</h4>
+                    <h4>Results ({heroesFiltered.length} results)</h4>
+
                     <hr />
+
+
+                    {
+                        (q === '')
+                        &&
+                        <div className="alert alert-info">
+                            Search a hero
+                        </div>
+                    }
+
+                    {
+                        (q !== '' && heroesFiltered.length === 0)
+                        &&
+                        <div className="alert alert-danger">
+                            There is not a hero with { q }
+                        </div>
+                    }
 
                     {
                         heroesFiltered.map(heroe => (
